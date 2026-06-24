@@ -1,0 +1,65 @@
+<main class="min-h-screen bg-slate-950 text-slate-100">
+  <div class="mx-auto max-w-5xl px-4 py-8">
+    <button
+      type="button"
+      (click)="goBack()"
+      class="mb-6 inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400"
+    >
+      ← Back
+    </button>
+
+    @switch (status()) {
+      @case ('loading') {
+        <app-detail-skeleton />
+      }
+
+      @case ('error') {
+        <div
+          role="alert"
+          class="rounded-2xl border border-red-500/30 bg-red-500/10 p-6 text-red-200"
+        >
+          We could not load this astronomy picture. It may not exist for that date.
+        </div>
+      }
+
+      @case ('success') {
+        @if (apod(); as item) {
+          <article class="space-y-6">
+            <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
+              @if (isVideo()) {
+                <div class="aspect-video w-full">
+                  <iframe
+                    [src]="videoUrl()"
+                    [title]="item.title"
+                    class="h-full w-full"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen
+                  ></iframe>
+                </div>
+              } @else {
+                <img
+                  [src]="item.hdurl ?? item.url"
+                  [alt]="item.title"
+                  class="max-h-[70vh] w-full object-contain"
+                />
+              }
+            </div>
+
+            <header class="space-y-2">
+              <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">{{ item.title }}</h1>
+              <p class="text-sm text-slate-400">
+                <time [attr.datetime]="item.date">{{ item.date | date: 'longDate' }}</time>
+                @if (item.copyright) {
+                  <span class="text-slate-500"> · © {{ item.copyright }}</span>
+                }
+              </p>
+            </header>
+
+            <p class="max-w-3xl text-base leading-relaxed text-slate-300">{{ item.explanation }}</p>
+          </article>
+        }
+      }
+    }
+  </div>
+</main>

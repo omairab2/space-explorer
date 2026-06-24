@@ -1,1 +1,11 @@
+@import "tailwindcss";
+
 /* You can add global styles to this file, and also import other style files */
+
+/* Dark base so route transitions never flash white before a page sets its own bg. */
+html,
+body {
+  min-height: 100%;
+  background-color: #020617; /* slate-950 */
+  color: #f1f5f9; /* slate-100 */
+}
