@@ -48,7 +48,7 @@ This keeps the key secret while still allowing client-side SPA navigation to det
 
 ### Prerequisites
 
-- **Node.js** 20+
+- **Node.js** 24.x (Angular 22's CLI requires ≥ 22.22.3 or ≥ 24.15.0)
 - **pnpm** ([install](https://pnpm.io/installation))
 - A free **NASA API key** — get one at [api.nasa.gov](https://api.nasa.gov)
 
@@ -82,14 +82,15 @@ pnpm start
 ## ☁️ Deployment (Vercel)
 
 This is a server-rendered app — it deploys as a **Node serverless function**, not a static
-site. [`vercel.json`](vercel.json) and [`api/index.mjs`](api/index.mjs) route all traffic
+site. [`vercel.json`](vercel.json) and [`api/ssr.mjs`](api/ssr.mjs) route all traffic
 through the compiled SSR server (`dist/space-explorer/server/server.mjs`).
 
 1. Import the repository into Vercel.
-2. In **Project Settings → Environment Variables**, set:
+2. Set **Project Settings → Node.js Version → `24.x`**. Angular 22's CLI requires Node ≥ 22.22.3 / ≥ 24.15.0; Vercel's `22.x` currently ships 22.22.2 (one patch too low), so use `24.x` (also pinned via `engines.node` in `package.json`).
+3. In **Project Settings → Environment Variables**, set:
    - **`NASA_API_KEY`** — your NASA key. The `.env` file is gitignored and **not** deployed, so the proxy needs it configured here.
    - **`NG_ALLOWED_HOSTS`** — allowed `Host` value(s), comma-separated and **without port**. Use `*.vercel.app` to cover both the production and per-push preview URLs (add your custom domain too if you have one). Angular SSR validates the `Host` header to prevent SSRF; without this, every SSR route returns `400 Bad Request`.
-3. Deploy. Vercel runs `pnpm build` and serves every route through the Angular SSR handler.
+4. Deploy. Vercel runs `pnpm build` and serves every route through the Angular SSR handler.
 
 ## 📐 Architecture Decision Records
 
