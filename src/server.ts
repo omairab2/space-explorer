@@ -26,24 +26,27 @@ const angularApp = new AngularNodeAppEngine();
  * the key is never shipped to the client. See docs/decisions/ADR-003.
  */
 app.get('/api/apod', async (req, res) => {
-  const params = new URLSearchParams({
-    api_key: process.env['NASA_API_KEY'] ?? '',
-    thumbs: 'true',
-  });
-  for (const name of FORWARDED_QUERY_PARAMS) {
-    const value = req.query[name];
-    if (typeof value === 'string') {
-      params.set(name, value);
-    }
-  }
-
   try {
+    // WHATWG URL instead of Express's `req.query` getter, which uses the legacy
+    // url.parse() under the hood (deprecated on Node 22 and a source of 502s).
+    const query = new URL(req.url, 'http://localhost').searchParams;
+    const params = new URLSearchParams({
+      api_key: process.env['NASA_API_KEY'] ?? '',
+      thumbs: 'true',
+    });
+    for (const name of FORWARDED_QUERY_PARAMS) {
+      const value = query.get(name);
+      if (value) {
+        params.set(name, value);
+      }
+    }
+
     const upstream = await fetch(`${NASA_APOD_URL}?${params.toString()}`, {
       signal: AbortSignal.timeout(NASA_PROXY_TIMEOUT_MS),
     });
     res.status(upstream.status).type('application/json').send(await upstream.text());
   } catch {
-    res.status(502).json({ error: 'Upstream NASA request failed' });
+    res.status(502).json({ error: 'Proxy error' });
   }
 });
 
